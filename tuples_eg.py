@@ -55,3 +55,18 @@ print (my_list)
 
 my_list[1:4] = []  # take slice 1 to 4 and replace with blank, this will delete 1 to 4 items
 print (my_list)
+
+my_list.remove('f') # Remove item using remove()
+print (my_list) 
+
+new_list = [1, 2, 3, 4]
+new_list.pop()   # Remove using pop function , pop removes last item
+print (new_list)
+new_list.pop(0)  # Remove first index item
+print (new_list)
+
+## Tupples means two items in the list
+
+print ("My name is %s" % "Mohan")  # %s substitue list into string
+print ("My name is %s %s" % ("Mohan", "Thakur")) # put tupple
+
