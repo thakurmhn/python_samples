@@ -1,0 +1,13 @@
+#!/bin/python3.6
+x=10
+if x==10:
+  print('Equal')
+
+if x>10:
+  print('Greater')
+
+if x<10:
+  print('lesser')
+
+print('END')
+  
