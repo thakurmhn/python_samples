@@ -3,7 +3,14 @@
 ## Escape character 'r'
 ## eg F=open(r'c:\training\log\out.txt',w)
 
-F=open(r'/home/user/test.txt','w') ## Open file for writing
+# 'r' - read only
+# 'w' - write only
+# 'a' - append
+# 'w+' - read/write mode
+# 'r+' - RW (overwrite)
+# 'a+' - Append and read
+
+F=open(r'/home/user/test.txt','w') ## Open file for writing and escaped '/'
 x=10
 y=20
 x=str(x)+'\n'  ## Numbers converted into string using 'str' function
