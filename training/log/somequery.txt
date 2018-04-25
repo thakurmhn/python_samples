@@ -1,0 +1,2 @@
+SELECT * FROM log_data;
+SELECT * FROM log_data;
