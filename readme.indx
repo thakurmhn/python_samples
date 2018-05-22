@@ -1,0 +1,255 @@
+======================================
+
+
+
+Topics
+
+1 - datatypes 
+
+	-numbers (int)
+
+	-strings
+
+	-list
+
+	-tuples
+
+	-set
+
+	-Dictionaries
+
+	- if condition
+
+	- for loop
+
+	- while loop
+
+	- file operations
+
+	- file processing
+
+	- function
+
+	- modules
+
+	- connecting to DB
+
+	- Regular Expressions
+
+	
+
+================
+
+
+
+
+
+
+
+IN Python Everything is Object
+
+
+
+============= Data Types ============================
+
+
+
+1. HOw to store numbers in program
+
+2. How to store stings
+
+3. how to store list
+
+4. Tupple
+
+5. Dictionaly 
+
+6. Sets (uniq values)
+
+
+
+
+
+Garbage Collection:
+
+When reference id becomes zero, garbage collection starts
+
+n10=300  - 0
+
+n11=n10  - 1
+
+n10=400  - 2
+
+n11=500  - 3
+
+
+
+n1=300 will be available for garbage collection.
+
+
+
+============================================================
+
+
+
+## Working with Stings
+
+
+
+# Store sting with '  ' or " " or  '''   ''' or """   """
+
+
+
+s='persion'
+
+
+
+print (s)
+
+s="person's"
+
+print (s)
+
+
+
+s='''persion's hight is 50"'''
+
+
+
+print (s)
+
+
+
+## print sting lenghth
+
+
+
+print (len(s))
+
+
+
+s='Welcome'
+
+print (s[0])
+
+print (s[2])
+
+print (s[3])
+
+
+
+## Print part of Sring
+
+# Slice
+
+print (s[1:6])
+
+print (s[ :6])
+
+print (s[2: ])
+
+print (s[ : ])
+
+
+
+## Concatination of string
+
+
+
+
+
+# HOw to use python debuger 
+
+
+
+#python -m pdb if_ex.
+
+
+
+## If you want to keep blak 'if' condition in your code it give syntax error, use dummy place holder 'pass'
+
+
+
+if condition: 
+
+  pass
+
+  
+
+=====================================
+
+## Zip function to combine list
+
+
+
+>>> L1=[10,20,30,40]
+
+>>> L2=['a','b','c']
+
+>>> L3=[100,200,300,400]
+
+>>> z=zip(L1,L2,L3)
+
+>>> list(z)
+
+[(10, 'a', 100), (20, 'b', 200), (30, 'c', 300)]
+
+========================================================
+
+zip is generator object, it first time load the list into memory and queue the items
+
+second time loads from queue - this reduce memory utilization and gives fast processing
+
+
+
+
+
+
+
+
+
+
+
+How to check available methods for datatypes
+
+
+
+>>> import builtins
+
+>>> dir(builtins)
+
+>>> L=[]
+
+>>> dir(L)
+
+
+
+===============================================
+
+
+
+Modules
+
+
+
+- Before importing a module __init__.py file is executed, we can write prerequisites needed to perform before importing module
+
+check training/lib/net/cloud/__init__.py and main_prog.py for reference
+
+
+
+==================================================
+
+
+
+Classes:
+
+
+
+# multiple copies of object
+
+# inheritance 
+
+# Operator overloading
+
+
