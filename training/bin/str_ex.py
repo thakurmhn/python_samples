@@ -125,3 +125,6 @@ res='addition of {1} and {2} is {0}'.format(z,x,y) # Replaces existing values 1,
 print ('Res2=',res)
 
 #Check join function
+s='_'
+seq=("a", "b", "c") # sequence of strings
+print(s.join(seq)   ## will join strings like a_b_c
