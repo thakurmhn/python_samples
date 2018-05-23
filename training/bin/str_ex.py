@@ -81,7 +81,7 @@ i=s2.index('L')
 j=s2.find('L')
 
 print ('index of L =', i,j)
-
+s2=' wel come '
 l=s2.strip()   # Remove space
 m=s2.lstrip() # Remove space left
 n=s2.rstrip() # remove space right
@@ -92,36 +92,36 @@ print ('l=',l, 'm=',m, 'n=',n)
 ## Other strings ##
 
 v='123'
-o=v.isdigit()
+o=v.isdigit()   # checks if string is a digit; returns True/False
 
 v='123abc'
-p=v.isalnum()
+p=v.isalnum() # checks if string is number
 
 s='abc'
 q=s.isalpha()
  
 s='wel come'
-q=s.split()   # wel come
+q=s.split()   # split word into two different strings ['wel', 'come']
 t=s.split('e')
 print ('q=',q, 't=',t) 
 
 ### More strings
 
 s='[welcome]'
-l=s.strip('[]')
-m=s.lstrip('[')
+l=s.strip('[]')  #Removes '[]' brackets from string both right and left
+m=s.lstrip('[')  
 n=s.rstrip(']')
 print ('l=',l, 'm=',m, 'n=',n)
-x=s.replace('[','x')
+x=s.replace('[','x')  # Replaces '[' with letter 'x'
 print ('Replace =',x)
 
 x=10
 y=20
 z=x+y
-res='additionof{}&{}is{}'.format(x,y,z)
+res='additionof{}&{}is{}'.format(x,y,z) # Fills the {} with values of x, y, z respectively 
 print ('res =',res)
 
-res='addition of {1} and {2} is {0}'.format(z,x,y)
+res='addition of {1} and {2} is {0}'.format(z,x,y) # Replaces existing values 1, 2, 0 with values of x, y, z
 print ('Res2=',res)
 
 #Check join function
