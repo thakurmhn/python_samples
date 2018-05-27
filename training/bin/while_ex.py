@@ -1,4 +1,10 @@
-#!/bin/python3.6
+#!/usr/bin/python3.5
+
+count=1
+while count <= 4:
+    print("looping",count)
+    count +=1
+    
 
 ## while works on booleans like if ; true/false 
 ## for works on lists

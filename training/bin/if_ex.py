@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/usr/bin/python3.5
 x=10
 if x==10:
   print('Equal')
@@ -59,3 +59,14 @@ if 100 not in D.values():
 
 if ('A',10) in D.items():  ## assigned tuple on the fly
   print('K values found')
+
+name="mohan"
+if len(name) >= 6:
+    print("name is long")
+elif len(name) <= 5:
+    print("Name is 5 character")
+elif len(name) >= 4:
+    print("name is 4 char")
+else:
+    print("name is short")
+

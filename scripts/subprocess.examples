@@ -1,0 +1,77 @@
+# subprocess to call external processes or commands or programs
+
+
+>>>import subprocess
+>>> proc = subprocess.run(['ls', '-l'])
+total 12
+-rw-rw-r-- 1 mohan mohan  73 May 26 13:46 newfile
+-rw-rw-r-- 1 mohan mohan 166 May 26 12:36 new_file
+-rw-rw-r-- 1 mohan mohan  85 May 26 13:46 os_list.txt
+>>> proc
+CompletedProcess(args=['ls', '-l'], returncode=0)    ## CompletedProcess object has returncode attribute
+# which we can use in later programs
+
+>>> proc.returncode
+0
+
+## By default run method does not capture STD OUT or STD ERR
+# to capture STD OUT or STD error, require to use PIPE method
+
+
+
+>>> proc = subprocess.run(
+...     ["ls", "-l"],
+...     stdout=subprocess.PIPE,
+...     stderr=subprocess.PIPE,
+... )
+>>> proc
+CompletedProcess(args=['ls', '-l'], returncode=0, stdout=b'total 12\n-rw-rw-r-- 1 mohan mohan  73 May 26 13:46 newfile\n-rw-rw-r-- 1 mohan mohan 166 May 26 12:36 new_file\n-rw-rw-r-- 1 mohan mohan  85 May 26 13:46 os_list.txt\n', stderr=b'')
+>>>
+>>> proc.stdout
+b'total 12\n-rw-rw-r-- 1 mohan mohan  73 May 26 13:46 newfile\n-rw-rw-r-- 1 mohan mohan 166 May 26 12:36 new_file\n-rw-rw-r-- 1 mohan mohan  85 May 26 13:46 os_list.txt\n'
+>>>
+>>>
+>>> proc.stderr
+b''
+>>> print(proc.stdout)
+b'total 12\n-rw-rw-r-- 1 mohan mohan  73 May 26 13:46 newfile\n-rw-rw-r-- 1 mohan mohan 166 May 26 12:36 new_file\n-rw-rw-r-- 1 mohan mohan  85 May 26 13:46 os_list.txt\n'
+>>>
+
+## STD out is byte object and not string
+# above print output start with b', stands for byte objects
+
+## What is bytes ; eg printing ASCII charaters 0 - 255
+
+>>> bytes([34, 43, 67])
+b'"+C'
+>>>
+
+## COnvert bytes to string using bytes decode method
+
+>>> print(proc.stdout.decode())
+total 12
+-rw-rw-r-- 1 mohan mohan  73 May 26 13:46 newfile
+-rw-rw-r-- 1 mohan mohan 166 May 26 12:36 new_file
+-rw-rw-r-- 1 mohan mohan  85 May 26 13:46 os_list.txt
+
+>>>
+
+## What happens when there is error?
+
+>>> new_proc = subprocess.run(["cat", "somefile.txt"])  ## non exist file
+cat: somefile.txt: No such file or directory
+>>> new_proc
+CompletedProcess(args=['cat', 'somefile.txt'], returncode=1)
+>>>
+
+
+## Generate a trace using check attribute
+
+>>> new_proc = subprocess.run(["cat", "somefile.txt"], check=True)
+cat: somefile.txt: No such file or directory
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/usr/lib/python3.5/subprocess.py", line 708, in run
+    output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['cat', 'somefile.txt']' returned non-zero exit status 1
+>>>

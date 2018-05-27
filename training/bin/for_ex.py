@@ -1,4 +1,15 @@
-#!/bin/python3.6
+#!/usr/bin/python3.5
+colors=['blue', 'red', 'green', 'yellow']
+for i in colors:
+    print(i)
+
+for i in colors:
+    if i == 'blue':
+        continue
+    elif i == 'red':
+        break
+    else:
+        print(i)
 
 S='welcome'
 

@@ -24,11 +24,12 @@ print (L[2][2])  # will print 't' within list item 'python'
 
 ## Adding Elements
 
-L.append(100)
+L.append(100)   ## Append new item at the end
 print('append =',L)
-L.insert(2,200)
+L.insert(2,200)  ## Insert item at given position; in this case 200 will be inserted as second element
 print ('Insert =',L)
 
+## Combine two lists
 
 M=[1,2,3]
 N=['a','b','c']
@@ -94,3 +95,6 @@ L3=copy.deepcopy(L1)
 L1[2].append('d')
 print ('L1 =', L1, 'L3 =', L3)
 
+print (4 in [1, 2, 3])  # checks if number is in the list and return True/False
+print (4 not in [1, 2, 3])  # checks if number is in the list and return True/False
+ 
