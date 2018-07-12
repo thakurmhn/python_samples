@@ -1,8 +1,8 @@
-#!/bin/python3.6
+#!/usr/bin/python3.6
 
 import sqlite3
 
-F=open(r'/opt/python_samples/training/log/log_sample.txt')
+F=open(r'../log/log_sample.txt')
 data=F.readlines()
 F.close()
 ip=[L.split()[0] for L in data if len(L.split('.'))>0 and L.split('.')[0].isdigit()]
@@ -19,7 +19,7 @@ for i,j in zip(ip,dt):
   cur.execute(query)
 con.commit()
 
-F2=open(r'/opt/python_samples/training/log/somequery.txt')
+F2=open(r'../log/somequery.txt')
 queries=F2.readlines()
 F2.close()
 for q in queries:
@@ -28,7 +28,7 @@ for q in queries:
   print(q)
 
 import os
-os_dir=r'/opt/python_samples/training/'
+os_dir=r'~/python_samples/training/'
 r=os.walk(os_dir)
 print(r)
 
