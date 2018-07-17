@@ -1,12 +1,7 @@
 #!/usr/bin/env python
-#version: 0.0.1
-#date: 06/12/2018
+#version: 0.0.2
+#date: 07/17/2018
 #Author: Mohan T
-
-
-
-
-
 
 import os
 from subprocess import Popen, PIPE, call 
@@ -14,9 +9,11 @@ import argparse
 import string
 import random
 import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from time import sleep
 
-ldapserver = 'ldap.int.example.com'
+ldapserver = 'ned-ldap.int.example.com'
 admindn = os.getenv('USER')
 
 parser=argparse.ArgumentParser(description='Adds group membership to ldap user')
@@ -27,24 +24,43 @@ parser.add_argument('--groups', '-g', nargs='+', help='provide space separated l
 parser.add_argument('--adduser', '-n', help='Creates a new ldap user account', action='store_true')
 parser.add_argument('--modattr', '-m', help='Modify users email address', action='store_true')
 parser.add_argument('--deletehost', '-d', help='Delete Host entry from LDAP', action='store_true')
+parser.add_argument('--notify', '-s', help='Send password reset link to the User', action='store_true')
+parser.add_argument('--addGroup', '-G', help='Add new LDAP group', action='store_true')
+parser.add_argument('--deleteGroup', '-D', help='Delete LDAP group; to be used as/with -D -g <space separated group(s)>', action='store_true')
+parser.add_argument('--locate', '-l', help='Locate LDAP User or Group; to be used as/with -u <uid> or -g <gid>', action='store_true')
 
 args = parser.parse_args()
-
 
 # Function to find last ldap userid
 # Note this is using legacy script /usr/local/bin/lnumber
 def find_lastuid():
-	if os.path.isfile('/usr/local/bin/lnumber'):
-		L = Popen(["lnumber"], stdout=PIPE)
-		L2 = Popen(["tail", "-n1"], stdin=L.stdout, stdout=PIPE)
-		L.stdout.close()
-		N = L2.communicate()[0].strip().split()
-    		lstuid = N[1]
-		nxtuid = int(lstuid) + 1
-		return nxtuid
-	else:
-		print("Check if /usr/local/bin/lnumber is exist")
+	L = Popen(['ldapsearch', '-xZZLh', '{}'.format(ldapserver), '-b', 'ou=People,dc=int,dc=example,dc=com'], stdout=PIPE)
+	L1 = Popen(["grep", "uidNumber"], stdin=L.stdout, stdout=PIPE)
+	L2 = Popen(["sort", "-k", "1", "-n"], stdin=L1.stdout, stdout=PIPE)
+	L.stdout.close()
+	L1.stdout.close()
+	L3 = Popen(["tail", "-n", "1"], stdin=L2.stdout, stdout=PIPE)
+	L2.stdout.close()
+	N = L3.communicate()[0].strip().split()
+    	lstuid = N[1]
+	nxtuid = int(lstuid) + 1
+	return nxtuid
+	#else:
+		#print("Check if /usr/local/bin/lnumber is exist")
 
+
+def find_last_gid():
+	L = Popen(['ldapsearch', '-xZZLh', '{}'.format(ldapserver), '-b', 'ou=Group,dc=int,dc=example,dc=com'], stdout=PIPE)
+	L1 = Popen(["grep", "gidNumber"], stdin=L.stdout, stdout=PIPE)
+	L2 = Popen(["sort", "-k", "2", "-n"], stdin=L1.stdout, stdout=PIPE)
+	L.stdout.close()
+	L1.stdout.close()
+	L3 = Popen(["tail", "-n", "1"], stdin=L2.stdout, stdout=PIPE)
+	L2.stdout.close()
+	N = L3.communicate()[0].strip().split()
+	lstgid = N[1]
+	nxtgid = int(lstgid) + 1
+	return nxtgid
 # Function for User Inputs
 def user_inputs():
 	U = find_lastuid()
@@ -81,23 +97,36 @@ def user_inputs():
 	print("-" * 80)
 	#ans = raw_input("Please confirm above information is correct, Y|N : ")
 
-
 	return (fname, lname, cfname, clname, userid, uidnum, mail, groupid, nixshell, userhome, passwd)
+
+# Function to send email notification to user upon user creation
+
+def grp_user_inputs():
+	G = find_last_gid()
+        try:
+        	gidnum = int(raw_input("Please enter UID number (default is: %s): " % G))
+        except ValueError:
+                gidnum = G
+                print("Default UID is used: %s" % G)
+        grpname = raw_input("Please enter new LDAP Group name: ")
+	print("-" * 80)
+	return (gidnum, grpname)	
+
+
 
 def send_email_notification(rmail, ruserid):
 	message = """From: Linux Operations Team <LinuxOperationsTeam@example.com>
-	To: %s
-	MIME-Version: 1.0
-	Content-type: text/html
-	Subject: LDAP User Account Activation
-
-	<p class=MsoNormal>Hello,</p>
-	<p class=MsoNormal>Your LDAP account has been activated.</p>
-	UserID: %s
-	<p class=MsoNormal>Please follow below link to reset your LDAP password.</p>
-	<p class=MsoNormal><a href="http://ldap-reset-tool.nedpr.paas.example.net">http://ldap-reset-tool.nedpr.paas.example.net</a>
-	</p>
-	<p class=MsoNormal>Thank You</p>""" % (rmail, ruserid)
+To: %s
+MIME-Version: 1.0
+Content-type: text/html
+Subject: LDAP User Account Activation
+<p class=MsoNormal>Hello,</p>
+<p class=MsoNormal>Your LDAP account has been activated.</p>
+UserID: %s
+<p class=MsoNormal>Please follow below link to reset your LDAP password.</p>
+<p class=MsoNormal><a href="http://ldap-reset-tool.nedpr.paas.example.net">http://ldap-reset-tool.nedpr.paas.example.net</a>
+</p>
+<p class=MsoNormal>Thank You</p>""" % (rmail, ruserid)
 	try:
 		server = smtplib.SMTP('glbsmtp.int.example.com',25)
 		server.sendmail('LinuxOperationsTeam@example.com', rmail, message)
@@ -105,6 +134,13 @@ def send_email_notification(rmail, ruserid):
 	except SMTPException:
 		print("Error sending email notification to new ldap user")
 		
+
+def find_attribute():
+	userid=args.userid
+	try:
+		output=Popen('ldapsearch -xLh dolomite.int.example.com -b "dc=int,dc=example,dc=com" "(uid=%s)"' % userid, stdout=PIPE)
+	except OSError: 
+		print(output)
 
 if args.userid and args.filename:
     
@@ -136,7 +172,6 @@ elif args.userid and args.groups:
 			call("ldapmodify -WxZZh %s -D \"uid=%s,ou=pci_policy,ou=People,dc=int,dc=example,dc=com\" -f " % (ldapserver, admindn)+ldfile, shell=True)
 			
 	call("rm -f %s" % ldfile, shell=True)
-			#print("ldapmodify -WxZZh %s -D \"uid=%s,ou=pci_policy,ou=People,dc=int,dc=example,dc=com\" -f " % (ldapserver, args.dn)+ldfile)
 elif args.adduser:
   flag = True
   while flag:
@@ -200,10 +235,8 @@ elif args.adduser:
 		flag = False
   call("rm -f %s" % ldfile, shell=True)
 elif args.modattr:
-#	attr = raw_input("Which attribute do you wish to modify?(mail, uid, homeDirectory) :")
 	acct = raw_input("For which user account do you wish to modify email address? :")
 	newattr = raw_input("Please specify new email address: ")
-	#if attr == 'mail':
 	with open('mod_attributes.ldif', 'w+') as F:
 		lines = ["dn: uid="+acct.strip()+",ou=pci_policy,ou=People,dc=int,dc=example,dc=com",
 			"changetype: modify",
@@ -217,35 +250,6 @@ elif args.modattr:
 		call("ldapmodify -WxZZh %s -D \"uid=%s,ou=pci_policy,ou=People,dc=int,dc=example,dc=com\" -f " % (ldapserver, admindn)+ldfile, shell=True)
 		call("rm -f %s" % ldfile, shell=True)
 
-#	elif attr == 'uid':
-#		with open('mod_attributes.ldif', 'w+') as F:
-#			lines = ["dn: uid="+acct.strip()+",ou=pci_policy,ou=People,dc=int,dc=example,dc=com",
-#				"changetype: modify",
-#				"replace: "+attr.strip(),
-#				"uid: "+newattr.strip()]
-#			for line in lines:
-#				F.write("%s\n" % line)
-#			ldfile=str(F).split(',')[0].split("'")[1]
-#			F.seek(0)
-#			L=F.readlines()
-#			call("ldapmodify -WxZZh %s -D \"uid=%s,ou=pci_policy,ou=People,dc=int,dc=example,dc=com\" -f " % (ldapserver, admindn)+ldfile, shell=True)
-#			call("rm -f %s" % ldfile, shell=True)
-#		
-#	elif attr == 'homeDirectory':
-#		with open('mod_attributes.ldif', 'w+') as F:
-#			lines = ["dn: uid="+acct.strip()+",ou=pci_policy,ou=People,dc=int,dc=example,dc=com",
-#				"changetype: modify",
-#				"replace: "+attr.strip(),
-#				"homeDirectory: "+newattr.strip()]
-#			for line in lines:
-#				F.write("%s\n" % line)
-#			ldfile=str(F).split(',')[0].split("'")[1]
-#			F.seek(0)
-#			L=F.readlines()
-#			call("ldapmodify -WxZZh %s -D \"uid=%s,ou=pci_policy,ou=People,dc=int,dc=example,dc=com\" -f " % (ldapserver, admindn)+ldfile, shell=True)
-#			call("rm -f %s" % ldfile, shell=True)
-	#else:
-	#	print("Please provide correct input values for the attribute")
 elif args.deletehost:
 	delhost = raw_input("Please specify host name you wish to delete (Use this option carefully) : ")
 	with open('mod_attributes.ldif', 'w+') as F:
@@ -257,5 +261,90 @@ elif args.deletehost:
 		L=F.readlines()
 		call("ldapmodify -WxZZh %s -D \"uid=%s,ou=pci_policy,ou=People,dc=int,dc=example,dc=com\" -f " % (ldapserver, admindn)+ldfile, shell=True)
 		call("rm -f %s" % ldfile, shell=True)
+
+elif args.notify:
+	email_id = raw_input("Please provide email ID to send passowrd reset URL: ")
+	message = """From: Linux Operations Team <LinuxOperationsTeam@example.com>
+To: %s
+MIME-Version: 1.0
+Content-type: text/html
+Subject: LDAP Password reset link
+<p class=MsoNormal>Hello,</p>
+<p class=MsoNormal>Please follow below link to reset your LDAP password.</p>
+<p class=MsoNormal><a href="http://ldap-reset-tool.nedpr.paas.example.net">http://ldap-reset-tool.nedpr.paas.example.net</a>
+</p>
+<p class=MsoNormal>Thank You</p>""" % email_id
+	try:
+		server = smtplib.SMTP('glbsmtp.int.example.com',25)
+		server.sendmail('LinuxOperationsTeam@example.com', email_id, message)
+		print("Successfully sent email notification to %s" % email_id)
+	except SMTPException:
+		print("Error sending email notification to new ldap user")
+
+elif args.addGroup:
+  flag = True
+  while flag:
+	V0, V1 = grp_user_inputs()
+	print("\n")
+	print("New Group details are as below")
+	print("-" * 80)
+	print("gidNumber:\t\t\t %s" % V0)
+	print("GroupName:\t\t\t %s" % V1)
+	print("-" * 80)	
+	ans = raw_input("please confirm above details are correct Y|N: ")
+	if ans == 'Y' or ans == 'y':
+		S=[V0, V1]
+		with open(V1+".ldif", 'w+') as F:
+			lines = ["dn: cn="+V1.strip()+",ou=group,dc=int,dc=example,dc=com",
+                                "changetype: add",
+				"gidNumber: "+str(V0),
+				"cn: "+V1,
+				"objectClass: top",
+				"objectClass: posixgroup"]
+			for line in lines:
+                            F.write("%s\n" % line)
+                        ldfile=str(F).split(',')[0].split("'")[1]
+                        F.seek(0)
+                        L=F.readlines()
+                        call("ldapmodify -WxZZh %s -D \"uid=%s,ou=pci_policy,ou=People,dc=int,dc=example,dc=com\" -f " % (ldapserver, admindn)+ldfile, shell=True)
+			flag = False
+  call("rm -f %s" % ldfile, shell=True)
+
+elif args.deleteGroup:
+	for grp in args.groups:
+                with open(grp+'.ldif', 'w+') as F:
+                        lines = ["dn: cn="+grp.strip()+",ou=Group,dc=int,dc=example,dc=com", "changetype: delete"]
+			for line in lines:
+				F.write("%s\n" % line)
+                        ldfile=str(F).split(',')[0].split("'")[1]
+                        F.seek(0)
+                        rline = F.readlines()
+                        call("ldapmodify -WxZZh %s -D \"uid=%s,ou=pci_policy,ou=People,dc=int,dc=example,dc=com\" -f " % (ldapserver, admindn)+ldfile, shell=True)
+
+        call("rm -f %s" % ldfile, shell=True)
+
+	
+elif args.locate:
+  if args.userid:
+      L = Popen(['ldapsearch', '-xZZLh', '{}'.format(ldapserver), '-b', 'ou=People,dc=int,dc=example,dc=com'], stdout=PIPE)
+      L1 = Popen(["grep", "uid:"], stdin=L.stdout, stdout=PIPE)
+      L.stdout.close()
+      L2 = Popen(["grep", '{}'.format(args.userid)], stdin=L1.stdout, stdout=PIPE)
+      L1.stdout.close()
+      UID = L2.communicate()[0]
+      print(UID)
+  elif args.groups:
+      grp = args.groups	
+      G = Popen(['ldapsearch', '-xZZLh', '{}'.format(ldapserver), '-b', 'ou=Group,dc=int,dc=example,dc=com'], stdout=PIPE)
+      G1 = Popen(["grep", "dn:"], stdin=G.stdout, stdout=PIPE)
+      G.stdout.close()
+      G2 = Popen(["grep", str(grp[0])], stdin=G1.stdout, stdout=PIPE)
+      data = G2.communicate()[0]
+      #for line in data:
+      D1=data.split("\n")
+      L1=D1[:-1]
+      for i in L1:
+	print(i.split(',')[0].split(' ')[1].split('=')[1])
+	
 else:
     print parser.print_help()
