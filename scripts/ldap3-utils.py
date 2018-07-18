@@ -16,7 +16,7 @@ from time import sleep
 ldapserver = 'ned-ldap.int.example.com'
 admindn = os.getenv('USER')
 
-parser=argparse.ArgumentParser(description='Adds group membership to ldap user')
+parser=argparse.ArgumentParser(description='LDAP User and Group management utility')
 #parser.add_argument('--dn', '-d', help='Your LDAP DN [UID]')
 parser.add_argument('--userid', '-u', help='LDAP account to which group membership to be added; To be used with -g or -f')
 parser.add_argument('--filename', '-f', help='Provide group list file to modify User\'s group membership ')
@@ -27,7 +27,7 @@ parser.add_argument('--deletehost', '-d', help='Delete Host entry from LDAP', ac
 parser.add_argument('--notify', '-s', help='Send password reset link to the User', action='store_true')
 parser.add_argument('--addGroup', '-G', help='Add new LDAP group', action='store_true')
 parser.add_argument('--deleteGroup', '-D', help='Delete LDAP group; to be used as/with -D -g <space separated group(s)>', action='store_true')
-parser.add_argument('--locate', '-l', help='Locate LDAP User or Group; to be used as/with -u <uid> or -g <gid>', action='store_true')
+parser.add_argument('--locate', '-l', help='Locate LDAP User or Group; to be used as/with -l -u <uid> or -g <gid>', action='store_true')
 
 args = parser.parse_args()
 
