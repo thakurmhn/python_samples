@@ -72,7 +72,27 @@ print(devide(10, 2))
 devide(6, 0)
 
 
+## Default parameters value
 
+def add(x, y):
+  total = x + y
+  return total
+
+print(add(5, 10))
+
+def add(x, y=3):  # y' assiged with default value of 3
+  total = x + y
+  return total
+
+print(add(5))
   
-  
+## Lambda Functions - take input process it and return output 
+
+divide = lambda x, y: x / y
+print(divide(12, 4))
+
+# above code is similar to 
+def divide(x, y):
+  return x / y
+print(divide(12, 4))
   
